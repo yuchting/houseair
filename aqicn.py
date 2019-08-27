@@ -123,9 +123,9 @@ def getData(city):
             data = {'aqi':orgdata['aqi']}
             for k,v in orgdata['iaqi'].items():
                 if k == 'pm25':
-                    data['PM2.5'] = v['v']
+                    data['PM2.5'] = float(v['v'])
                 else:
-                    data[k.upper()] = v['v']
+                    data[k.upper()] = float(v['v'])
 
             newdata['data'] = data            
             return newdata
