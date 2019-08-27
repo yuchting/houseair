@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import dateutil.parser
 import threading
 import traceback
 import uart
@@ -79,7 +78,7 @@ def init():
     least = db.getLeastData(aqicnMeasurement)
     if least != None:
         global aqicnLeastTime
-        aqicnLeastTime = dateutil.parser.parse(least['time'])
+        aqicnLeastTime = datetime.strptime(least['time'], "%Y-%m-%dT%H:%M:%SZ")
     else:
         writeAqi()    
 

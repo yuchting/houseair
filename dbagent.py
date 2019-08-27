@@ -21,9 +21,9 @@ class DBAgent:
 
     def insertData(self, measurement, fields, current_time=None):
         if current_time == None :
-            current_time = datetime.datetime.utcnow().isoformat("T")
+            current_time = datetime.datetime.utcnow().isoformat()
         elif type(current_time) is datetime.datetime:
-            current_time = current_time.isoformat("T")
+            current_time = current_time.isoformat()
 
         if not (type(fields) is dict) : 
             raise ValueError("fields must be dict type! but get " + str(type(fields)))
