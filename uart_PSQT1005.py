@@ -83,8 +83,8 @@ def mainloop(printInfo, callback=None):
                                 print("PM2.5: {} ug/m^3".format(data['PM2.5']))
                                 print("PM10: {} ug/m^3".format(data['PM10']))
                                 print("CO2: {} ppm".format(data['CO2']))
-                                print("CH2O: {} ug/m^3".format(data['CH2O']))
-                                print("TVOC: {} ug/m^3".format(data['TVOC']))                                
+                                print("CH2O: {} mg/m^3".format(data['CH2O']))
+                                print("TVOC: {} ppm".format(data['TVOC']))                                
                                 print("Temp: {:.1f} C".format(data['T']))
                                 print("Humi: {:.1f} %".format(data['Humi']))
 
