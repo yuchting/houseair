@@ -76,9 +76,7 @@ def parseTemperature(serialdata):
 def mainloop(printInfo, callback=None):
     try:
         while True:
-            # 获得接收缓冲区字符
             if ser.inWaiting() >= 0:
-                # 读取内容并回显
                 global serialdata
                 serialdata = serialdata + ser.read_all()
 
