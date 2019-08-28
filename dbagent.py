@@ -17,7 +17,7 @@ class DBAgent:
         if not hasDefaultDb:
             print("create the database:",dbname)
             self.dbclient.create_database(dbname)
-            self.dbclient.alter_retention_policy('autogen',dbname,'20d',1,True)  
+            self.dbclient.alter_retention_policy('autogen',dbname,'7d',1,True)  
 
     def insertData(self, measurement, fields, current_time=None):
         if current_time == None :
