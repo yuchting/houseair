@@ -11,6 +11,7 @@ from datetime import datetime, timedelta
 defaultCity = 'shanghai'
 aqicnMeasurement = 'aqicn'
 houseMeasurement = 'house'
+aqicnRequestInterval = timedelta(hours=1)
 
 db = dbagent.DBAgent()
 aqicnLeastTime = None
@@ -68,11 +69,20 @@ def writeAqi():
     data = aqicn.getData(defaultCity)
 
     global aqicnLeastTime
-    if aqicnLeastTime != data['time'] :
-        print('write {} measurement, least time {}, data {} '.format(aqicnMeasurement, aqicnLeastTime, data))
+    if data != None :    
+        if aqicnLeastTime != data['time'] :
+            print('write {} measurement, least time {}, data {} '.format(aqicnMeasurement, aqicnLeastTime, data))
 
-        db.insertData(aqicnMeasurement,data['data'], data['time'])
-        aqicnLeastTime = data['time']
+            db.insertData(aqicnMeasurement,data['data'], data['time'])
+            aqicnLeastTime = data['time']
+
+            if datetime.utcnow() - aqicnLeastTime >= aqicnRequestInterval :
+                # if the data's time less than request interval
+                # try it again in 15 minutes
+                aqicnLeastTime = datetime.utcnow() - aqicnRequestInterval + timedelta(minutes=15)
+    else :
+        # try it again 15 minutes later
+        aqicnLeastTime = datetime.utcnow() - aqicnRequestInterval + timedelta(minutes=5)
 
 def init():
     least = db.getLeastData(aqicnMeasurement)
@@ -85,7 +95,7 @@ def init():
 def wrtingThread(housedata):
     try:
         global aqicnLeastTime
-        if datetime.utcnow() - aqicnLeastTime >= timedelta(hours=2):
+        if datetime.utcnow() - aqicnLeastTime >= aqicnRequestInterval :
             writeAqi()
 
         housedata['PM2.5_cn'] = calcAqi(housedata['PM2.5'], True)
