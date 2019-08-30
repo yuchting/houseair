@@ -13,7 +13,7 @@ SEND_DATA = b'\x42\x4D\xAC\x00\x00\x01\x3B'
 # initialize the serial port
 ser = serial.Serial("/dev/ttyS0", 9600)
 
-serialdata = b''
+serialdata = b""
 datalist = []
 
 def checkData(serialdata, printInfo=False):
@@ -67,8 +67,7 @@ def mainloop(printInfo, callback=None):
                 
                 # wait for second
                 time.sleep(READ_INTERVAL)
-                attemptCount += 1
-                
+                                
                 if ser.inWaiting() >= 0:
                     
                     if printInfo : 
@@ -112,22 +111,27 @@ def mainloop(printInfo, callback=None):
                                     
                                 datalist.clear()
                             
-                            serialdata = serialdata[MAX_READ_COUNT:]
+                            serialdata = b""
 
                         else:
                             print("Checked error serialdata!")
                             checkData(serialdata, True)
+                            attemptCount = READ_DATA_ATTEMPTS
                             break
                         
                         break   
                     else:
                         if printInfo : 
                             print("received {} data, wait for others".format(len(serialdata)))
-                            
+                
+                attemptCount += 1
+                   
             if attemptCount >= READ_DATA_ATTEMPTS:
+                # reset all data when it's over fixed read attempts
                 serialdata = b""
-                ser.flush()
-                           
+                ser.flushInput()
+                time.sleep(READ_INTERVAL)
+                
                 if printInfo:
                     print("\n!!!!!! cannot read any data by {} attempts\n".format(READ_DATA_ATTEMPTS))
                     
