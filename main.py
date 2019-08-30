@@ -2,7 +2,7 @@
 
 import threading
 import traceback
-import uart
+import uart_PSQT1005
 import dbagent
 import aqicn
 
@@ -117,5 +117,5 @@ def loopCallback(housedata):
 
 if __name__ == '__main__':
     init()
-    uart.mainloop(False, loopCallback)
+    uart_PSQT1005.mainloop(False, loopCallback)
     
