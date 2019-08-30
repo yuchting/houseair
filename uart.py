@@ -21,7 +21,7 @@ def average(datalist):
         sum = 0.0
         for i in datalist:
             sum += i[k]
-        sum = round(sum/length,1)
+        sum = round(sum/length,2)
         
         if type(i[k]) is int :
             sum = int(sum)

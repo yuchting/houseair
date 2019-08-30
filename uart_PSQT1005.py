@@ -72,8 +72,8 @@ def mainloop(printInfo, callback=None):
                             data['PM1.0'] = int(serialdata[10]) * 256 + int(serialdata[11])
                             data['PM2.5'] = int(serialdata[12]) * 256 + int(serialdata[13])
                             data['PM10'] = int(serialdata[14]) * 256 + int(serialdata[15])
-                            data['TVOC'] = int(serialdata[28]) * 256 + int(serialdata[29])
-                            data['CH2O'] = int(serialdata[31]) * 256 + int(serialdata[32])
+                            data['TVOC'] = (int(serialdata[28]) * 256 + int(serialdata[29])) / 100.0
+                            data['CH2O'] = (int(serialdata[31]) * 256 + int(serialdata[32])) / 100.0
                             data['CO2'] = int(serialdata[34]) * 256 + int(serialdata[35])
                             data['T'] = parseNegative(int(serialdata[36]), int(serialdata[37]))
                             data['Humi'] = parseNegative(int(serialdata[38]), int(serialdata[39]))
@@ -106,6 +106,11 @@ def mainloop(printInfo, callback=None):
                             print("Checked error serialdata!")
                             checkData(serialdata, True)
                             serialdata = b""
+                            
+                            # clear the input data and sleep will
+                            # in fact, we best to reset by hardware
+                            ser.flushInput()
+                            time.sleep(READ_INTERVAL)
                         
                         if printInfo : 
                             print("")
