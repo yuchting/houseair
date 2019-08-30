@@ -6,6 +6,7 @@ import uart
 MAX_READ_COUNT = 42
 AVERAGE_TIMES = 5
 READ_INTERVAL = 1.0 # in seconds
+READ_DATA_ATTEMPTS = 2
 
 SEND_DATA = b'\x42\x4D\xAC\x00\x00\x01\x3B'
 
@@ -54,14 +55,25 @@ def mainloop(printInfo, callback=None):
     try:
         while True:
             
+            if printInfo : 
+                print("\nwrite command")
+                
             ser.write(SEND_DATA)
             ser.flushOutput()
 
-            while True:
+            attemptCount = 0
+            
+            while attemptCount < READ_DATA_ATTEMPTS:
+                
                 # wait for second
-                time.sleep(READ_INTERVAL / 2)
-
+                time.sleep(READ_INTERVAL)
+                attemptCount += 1
+                
                 if ser.inWaiting() >= 0:
+                    
+                    if printInfo : 
+                        print("read data")
+                
                     global serialdata
                     serialdata = serialdata + ser.read_all()
 
@@ -105,23 +117,20 @@ def mainloop(printInfo, callback=None):
                         else:
                             print("Checked error serialdata!")
                             checkData(serialdata, True)
-                            serialdata = b""
-                            
-                            # clear the input data and sleep will
-                            # in fact, we best to reset by hardware
-                            ser.flushInput()
-                            time.sleep(READ_INTERVAL)
+                            break
                         
-                        if printInfo : 
-                            print("")
-
                         break   
                     else:
                         if printInfo : 
-                            print("received {} data, wait for others".format(len(serialdata)))            
-                
-            time.sleep(READ_INTERVAL / 2)
-            
+                            print("received {} data, wait for others".format(len(serialdata)))
+                            
+            if attemptCount >= READ_DATA_ATTEMPTS:
+                serialdata = b""
+                ser.flush()
+                           
+                if printInfo:
+                    print("\n!!!!!! cannot read any data by {} attempts\n".format(READ_DATA_ATTEMPTS))
+                    
     except Exception as ex:
         print(ex)
     finally:
