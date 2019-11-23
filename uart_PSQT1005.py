@@ -5,7 +5,7 @@ import uart
 
 MAX_READ_COUNT = 42
 AVERAGE_TIMES = 5
-READ_INTERVAL = 1.0 # in seconds
+READ_INTERVAL = 2.0 # in seconds
 READ_DATA_ATTEMPTS = 2
 
 SEND_DATA = b'\x42\x4D\xAC\x00\x00\x01\x3B'
