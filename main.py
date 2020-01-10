@@ -5,6 +5,7 @@ import traceback
 import uart_PSQT1005
 import dbagent
 import aqicn
+import dbhttp
 
 from datetime import datetime, timedelta
 
@@ -90,7 +91,9 @@ def init():
         global aqicnLeastTime
         aqicnLeastTime = datetime.strptime(least['time'], "%Y-%m-%dT%H:%M:%SZ")
     else:
-        writeAqi()    
+        writeAqi()
+        
+    dbhttp.startHttpServer(8090, db)
 
 def wrtingThread(housedata):
     try:
