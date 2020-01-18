@@ -96,6 +96,9 @@ def init():
     dbhttp.startHttpServer(8090, db)
 
 def wrtingThread(housedata):
+    global isWritingDb
+    isWritingDb = True
+    
     try:
         global aqicnLeastTime
         if datetime.utcnow() - aqicnLeastTime >= aqicnRequestInterval :
@@ -109,6 +112,8 @@ def wrtingThread(housedata):
         print("inserted data: ", housedata)
     except Exception:
         traceback.print_exc()
+        
+    isWritingDb = False
 
 
 def loopCallback(housedata):
