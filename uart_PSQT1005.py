@@ -2,11 +2,14 @@
 import serial
 import time
 import uart
+import RPi.GPIO as GPIO
 
 MAX_READ_COUNT = 42
 AVERAGE_TIMES = 5
 READ_INTERVAL = 2.0 # in seconds
 READ_DATA_ATTEMPTS = 2
+
+RESET_COUNT = 30 * 60 / READ_INTERVAL 
 
 SEND_DATA = b'\x42\x4D\xAC\x00\x00\x01\x3B'
 
@@ -15,6 +18,15 @@ ser = serial.Serial("/dev/ttyS0", 9600)
 
 serialdata = b""
 datalist = []
+
+GPIO_PIN_NUM = 11
+
+# BOARD编号方式，基于插座引脚编号    
+GPIO.setmode(GPIO.BOARD)    
+# 输出模式
+GPIO.setup(GPIO_PIN_NUM, GPIO.OUT)
+
+
 
 def checkData(serialdata, printInfo=False):
     
@@ -53,7 +65,22 @@ def parseNegative(high, low):
 
 def mainloop(printInfo, callback=None):
     try:
+        read_count = 0
+        GPIO.output(GPIO_PIN_NUM, GPIO.HIGH)
+
         while True:
+
+            read_count = read_count + 1
+            if read_count >= RESET_COUNT:
+                # set the GPIO high to reset the sensor
+                read_count = 0
+                GPIO.output(GPIO_PIN_NUM, GPIO.LOW)
+                time.sleep(1)
+                GPIO.output(GPIO_PIN_NUM, GPIO.HIGH)
+                time.sleep(1)
+                
+                if printInfo : 
+                    print("reset the sensor")
             
             if printInfo : 
                 print("\nwrite command")
