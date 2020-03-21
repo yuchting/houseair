@@ -9,6 +9,7 @@ AVERAGE_TIMES = 5
 READ_INTERVAL = 2.0 # in seconds
 READ_DATA_ATTEMPTS = 2
 
+# reset it in every 30 minutes 
 RESET_COUNT = 30 * 60 / READ_INTERVAL 
 
 SEND_DATA = b'\x42\x4D\xAC\x00\x00\x01\x3B'
@@ -25,8 +26,6 @@ GPIO_PIN_NUM = 11
 GPIO.setmode(GPIO.BOARD)    
 # 输出模式
 GPIO.setup(GPIO_PIN_NUM, GPIO.OUT)
-
-
 
 def checkData(serialdata, printInfo=False):
     
@@ -65,25 +64,30 @@ def parseNegative(high, low):
 
 def mainloop(printInfo, callback=None):
     try:
-        read_count = 0
+        write_count = 0
         GPIO.output(GPIO_PIN_NUM, GPIO.HIGH)
 
         while True:
 
-            read_count = read_count + 1
-            if read_count >= RESET_COUNT:
+            write_count = write_count + 1
+            if write_count >= RESET_COUNT:
+
+                if printInfo : 
+                    print("reset the sensor...")
+
                 # set the GPIO high to reset the sensor
-                read_count = 0
+                write_count = 0
                 GPIO.output(GPIO_PIN_NUM, GPIO.LOW)
                 time.sleep(1)
                 GPIO.output(GPIO_PIN_NUM, GPIO.HIGH)
-                time.sleep(1)
-                
+                time.sleep(10)
+
                 if printInfo : 
-                    print("reset the sensor")
+                    print("reset the sensor done!")
+                
             
             if printInfo : 
-                print("\nwrite command")
+                print("\nwrite command write_count==" + str(write_count))
                 
             ser.write(SEND_DATA)
             ser.flushOutput()
