@@ -10,7 +10,7 @@ def getData(city):
     
     try:
         url = apihost.format(city,token)
-        res = requests.get(url)
+        res = requests.get(url, timeout=3)
 
         if res.status_code == 200 :
             '''
