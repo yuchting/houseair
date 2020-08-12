@@ -9,7 +9,7 @@ import dbhttp
 
 from datetime import datetime, timedelta
 
-defaultCity = 'shanghai'
+defaultCity = 'beijing'
 aqicnMeasurement = 'aqicn'
 houseMeasurement = 'house'
 aqicnRequestInterval = timedelta(hours=1)

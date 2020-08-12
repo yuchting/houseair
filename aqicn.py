@@ -140,7 +140,7 @@ def getData(city):
         return None
 
 if __name__ == "__main__":
-    data = getData("shanghai")
+    data = getData("beijing")
     print(datetime.utcnow() - data['time'])
     if data != None:
         print(data)
