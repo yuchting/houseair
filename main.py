@@ -6,6 +6,7 @@ import uart_PSQT1005
 import dbagent
 import aqicn
 import dbhttp
+import sys
 
 from datetime import datetime, timedelta
 
@@ -13,8 +14,7 @@ defaultCity = 'beijing'
 aqicnMeasurement = 'aqicn'
 houseMeasurement = 'house'
 aqicnRequestInterval = timedelta(hours=1)
-
-db = dbagent.DBAgent()
+db = None
 aqicnLeastTime = None
 
 isWritingDb = False
@@ -86,6 +86,9 @@ def writeAqi():
         aqicnLeastTime = datetime.utcnow() - aqicnRequestInterval + timedelta(minutes=5)
 
 def init():
+    global db
+    db = dbagent.DBAgent('127.0.0.1' if len(sys.argv) <= 1 else sys.argv[1])
+
     least = db.getLeastData(aqicnMeasurement)
     if least != None:
         global aqicnLeastTime

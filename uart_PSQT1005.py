@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*
 import serial
 import time
-import uart
 import RPi.GPIO as GPIO
+
 
 MAX_READ_COUNT = 42
 AVERAGE_TIMES = 5
@@ -15,7 +15,7 @@ RESET_COUNT = 30 * 60 / READ_INTERVAL
 SEND_DATA = b'\x42\x4D\xAC\x00\x00\x01\x3B'
 
 # initialize the serial port
-ser = serial.Serial("/dev/ttyS0", 9600)
+ser = serial.Serial("/dev/serial0", 9600)
 
 serialdata = b""
 datalist = []
@@ -26,6 +26,26 @@ GPIO_PIN_NUM = 11
 GPIO.setmode(GPIO.BOARD)    
 # 输出模式
 GPIO.setup(GPIO_PIN_NUM, GPIO.OUT)
+
+def average(datalist):
+    length = len(datalist)
+    if len(datalist) == 0 :
+        raise ValueError("the length of datalist must be greater and equal then 1")
+
+    result = {}
+    keys = datalist[0].keys()
+    for k in keys:
+        sum = 0.0
+        for i in datalist:
+            sum += i[k]
+        sum = round(sum/length,2)
+        
+        if type(i[k]) is int :
+            sum = int(sum)
+            
+        result[k] = sum
+
+    return result
 
 def checkData(serialdata, printInfo=False):
     
@@ -90,7 +110,10 @@ def mainloop(printInfo, callback=None):
                 print("\nwrite command write_count==" + str(write_count))
                 
             ser.write(SEND_DATA)
+            print("\nser.write(SEND_DATA)")
+
             ser.flushOutput()
+            print("\nser.flushOutput()")
 
             attemptCount = 0
             
@@ -133,7 +156,7 @@ def mainloop(printInfo, callback=None):
                             datalist.append(data)
 
                             if len(datalist) >= AVERAGE_TIMES:
-                                aver = uart.average(datalist)
+                                aver = average(datalist)
                                 if printInfo :
                                     print("average: ", aver)
                                     
