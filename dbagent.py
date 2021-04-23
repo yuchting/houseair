@@ -2,12 +2,15 @@
 from influxdb import InfluxDBClient
 import datetime
 
+
 class DBAgent:
-        
-    def __init__(self, dbhost="127.0.0.1", dbport=8086,dbname="airdb",dbusr="",dbpass=""):
-        self.dbclient = InfluxDBClient(dbhost, dbport, dbusr, dbpass, dbname)
+
+    def __init__(self, dbhost="127.0.0.1", dbport=8086, dbname="airdb", dbusr="", dbpass=""):
+        self.dbclient = InfluxDBClient(
+            dbhost, dbport, dbusr, dbpass, dbname, timeout=3)
+
         databases = self.dbclient.get_list_database()
-        
+
         hasDefaultDb = False
         for db in databases:
             if db["name"] == dbname:
@@ -15,18 +18,20 @@ class DBAgent:
                 break
 
         if not hasDefaultDb:
-            print("create the database:",dbname)
+            print("create the database:", dbname)
             self.dbclient.create_database(dbname)
-            self.dbclient.alter_retention_policy('autogen',dbname,'7d',1,True)  
+            self.dbclient.alter_retention_policy(
+                'autogen', dbname, '7d', 1, True)
 
     def insertData(self, measurement, fields, current_time=None):
-        if current_time == None :
+        if current_time == None:
             current_time = datetime.datetime.utcnow().isoformat()
         elif type(current_time) is datetime.datetime:
             current_time = current_time.isoformat()
 
-        if not (type(fields) is dict) : 
-            raise ValueError("fields must be dict type! but get " + str(type(fields)))
+        if not (type(fields) is dict):
+            raise ValueError(
+                "fields must be dict type! but get " + str(type(fields)))
 
         data = [
             {
@@ -35,17 +40,19 @@ class DBAgent:
                 "fields": fields,
             }
         ]
-        
+
         self.dbclient.write_points(data)
 
     def getLeastData(self, measurement):
-        query = "select * from {} order by time desc limit 1;".format(measurement)
+        query = "select * from {} order by time desc limit 1;".format(
+            measurement)
         result = self.dbclient.query(query)
         datalist = list(result.get_points(measurement=measurement))
-        if len(datalist) == 1 : 
+        if len(datalist) == 1:
             return datalist[0]
         else:
             return None
+
 
 if __name__ == "__main__":
     db = DBAgent()
@@ -72,6 +79,5 @@ if __name__ == "__main__":
                 "Humi":80
             })
     '''
-    
-    print(db.getLeastData("aqicn"))
 
+    print(db.getLeastData("aqicn"))

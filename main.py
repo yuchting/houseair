@@ -19,7 +19,8 @@ aqicnLeastTime = None
 
 isWritingDb = False
 
-def calcAqi(value, CNOrUS):     
+
+def calcAqi(value, CNOrUS):
     '''
         check https://www.zhihu.com/question/22206538 for detail of following data values
     '''
@@ -53,37 +54,40 @@ def calcAqi(value, CNOrUS):
         400,    500
     ]
 
-    
     tableC = aqiC_us
-    if CNOrUS :
+    if CNOrUS:
         tableC = aqiC_cn
-    
+
     result = aqi_index[len(aqi_index) - 1]
     for i in range(0, len(aqi_index) >> 1):
         idx = i << 1
         if value >= tableC[idx] and value < tableC[idx + 1]:
-            result = (aqi_index[idx + 1] - aqi_index[idx]) / (tableC[idx + 1] - tableC[idx]) * (value - tableC[idx]) + aqi_index[idx]
+            result = (aqi_index[idx + 1] - aqi_index[idx]) / (tableC[idx +
+                                                                     1] - tableC[idx]) * (value - tableC[idx]) + aqi_index[idx]
 
     return int(round(result))
+
 
 def writeAqi():
     data = aqicn.getData(defaultCity)
 
     global aqicnLeastTime
-    if data != None :    
-        if aqicnLeastTime != data['time'] :
-            print('write {} measurement, least time {}, data {} '.format(aqicnMeasurement, aqicnLeastTime, data))
+    if data != None:
+        if aqicnLeastTime != data['time']:
+            print('write {} measurement, least time {}, data {} '.format(
+                aqicnMeasurement, aqicnLeastTime, data))
 
-            db.insertData(aqicnMeasurement,data['data'], data['time'])
+            db.insertData(aqicnMeasurement, data['data'], data['time'])
             aqicnLeastTime = data['time']
 
-            if datetime.utcnow() - aqicnLeastTime >= aqicnRequestInterval :
+            if datetime.utcnow() - aqicnLeastTime >= aqicnRequestInterval:
                 # if the data's time less than request interval
                 # try it again in 15 minutes
                 aqicnLeastTime = datetime.utcnow() - aqicnRequestInterval + timedelta(minutes=15)
-    else :
+    else:
         # try it again 15 minutes later
         aqicnLeastTime = datetime.utcnow() - aqicnRequestInterval + timedelta(minutes=5)
+
 
 def init():
     global db
@@ -95,16 +99,19 @@ def init():
         aqicnLeastTime = datetime.strptime(least['time'], "%Y-%m-%dT%H:%M:%SZ")
     else:
         writeAqi()
-        
+
     dbhttp.startHttpServer(8090, db)
+
 
 def wrtingThread(housedata):
     global isWritingDb
     isWritingDb = True
-    
+
     try:
+        print("start writing db...")
+
         global aqicnLeastTime
-        if datetime.utcnow() - aqicnLeastTime >= aqicnRequestInterval :
+        if datetime.utcnow() - aqicnLeastTime >= aqicnRequestInterval:
             writeAqi()
 
         housedata['PM2.5_cn'] = calcAqi(housedata['PM2.5'], True)
@@ -115,18 +122,19 @@ def wrtingThread(housedata):
         print("inserted data: ", housedata)
     except Exception:
         traceback.print_exc()
-        
+
     isWritingDb = False
 
 
 def loopCallback(housedata):
-    if isWritingDb :
+    print("got house data to write db")
+    if isWritingDb:
         return
     else:
         t = threading.Thread(target=wrtingThread, args=(housedata,))
-        t.start() 
+        t.start()
+
 
 if __name__ == '__main__':
     init()
     uart_PSQT1005.mainloop(False, loopCallback)
-    
