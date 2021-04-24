@@ -5,7 +5,11 @@ import datetime
 
 class DBAgent:
 
-    def __init__(self, dbhost="127.0.0.1", dbport=8086, dbname="airdb", dbusr="", dbpass=""):
+    def __init__(self, dbhost="127.0.0.1", dbport=8086, dbname="airdb", dbusr="", dbpass="", delayWritingCount=1):
+
+        self.delayWritingCount = delayWritingCount
+        self.delayWritingData = []
+
         self.dbclient = InfluxDBClient(
             dbhost, dbport, dbusr, dbpass, dbname, timeout=3)
 
@@ -23,6 +27,15 @@ class DBAgent:
             self.dbclient.alter_retention_policy(
                 'autogen', dbname, '7d', 1, True)
 
+    def setCacheCount(self, delayWritingCount):
+        self.delayWritingCount = delayWritingCount
+        self.flushDB()
+
+    def flushDB(self):
+        if len(self.delayWritingData) > 0:
+            self.dbclient.write_points(self.delayWritingData)
+            self.delayWritingCount.clear()
+
     def insertData(self, measurement, fields, current_time=None):
         if current_time == None:
             current_time = datetime.datetime.utcnow().isoformat()
@@ -33,15 +46,18 @@ class DBAgent:
             raise ValueError(
                 "fields must be dict type! but get " + str(type(fields)))
 
-        data = [
-            {
-                "measurement": measurement,
-                "time": current_time,
-                "fields": fields,
-            }
-        ]
+        data = {
+            "measurement": measurement,
+            "time": current_time,
+            "fields": fields,
+        }
 
-        self.dbclient.write_points(data)
+        if self.delayWritingCount > 1:
+            self.delayWritingData.append(data)
+            if len(self.delayWritingData) >= self.delayWritingCount:
+                self.flushDB()
+        else:
+            self.dbclient.write_points([data])
 
     def getLeastData(self, measurement):
         query = "select * from {} order by time desc limit 1;".format(
