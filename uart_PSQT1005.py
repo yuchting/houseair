@@ -10,7 +10,7 @@ READ_INTERVAL = 2.0  # in seconds
 READ_DATA_ATTEMPTS = 2
 
 # reset it in every 30 minutes
-RESET_COUNT = 30 * 60 / READ_INTERVAL
+RESET_COUNT = 5 * 60 / READ_INTERVAL
 
 SEND_DATA = b'\x42\x4D\xAC\x00\x00\x01\x3B'
 
